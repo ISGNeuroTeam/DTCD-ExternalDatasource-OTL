@@ -7,8 +7,8 @@ Required section:
 Addition section:
 endef
 
-PROJECT_NAME = DTCD-ExternalDatasource-OTL
-PLUGIN_NAME = ExternalDatasource-OTL
+PROJECT_NAME = DTCD-ExternalDataSource-OTL
+PLUGIN_NAME = ExternalDataSource-OTL
 
 GENERATE_VERSION = $(shell jq .version ./${PROJECT_NAME}/package.json )
 GENERATE_BRANCH = $(shell git name-rev $$(git rev-parse HEAD) | cut -d\  -f2 | sed -re 's/^(remotes\/)?origin\///' | tr '/' '_')
@@ -110,3 +110,4 @@ connector:
 
 dev: build
 	cp -rf ./build/$(PROJECT_NAME) ./../DTCD/server/plugins
+	npm run dev --prefix ./$(PROJECT_NAME)

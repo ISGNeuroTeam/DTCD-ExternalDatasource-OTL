@@ -1,12 +1,11 @@
-import { BaseDataset } from 'SDK/DatasourceClasses';
+import {BaseDataset} from 'SDK/DataSourceClasses';
 
 export class DatasetView extends BaseDataset {
-
   #jobDataset;
   #urls = [];
   #data = null;
 
-  constructor (jobDataset = null) {
+  constructor(jobDataset = null) {
     super();
     this.#jobDataset = jobDataset;
     this.#jobDataset.urls().then(res => {
@@ -14,34 +13,33 @@ export class DatasetView extends BaseDataset {
     });
   }
 
-  async #checkData () {
+  async #checkData() {
     if (!this.#data) {
       this.#data = await this.#jobDataset.data();
     }
   }
 
-  get schema () {
+  get schema() {
     return this.#jobDataset.parseSchema();
   }
 
-  async full () {
+  async full() {
     await this.#checkData();
     return this.#data;
   }
 
-  async firstLine () {
+  async firstLine() {
     await this.#checkData();
     return this.#data[0];
   }
 
-  async lastLine () {
+  async lastLine() {
     await this.#checkData();
     return this.#data[this.#data.length - 1];
   }
 
-  async getLineByNumber (num) {
+  async getLineByNumber(num) {
     await this.#checkData();
     return this.#data[num - 1];
   }
-
 }
