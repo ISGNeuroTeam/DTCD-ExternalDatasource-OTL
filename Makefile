@@ -20,7 +20,7 @@ SET_PACK_NAME = $(eval PACK_NAME=$(PROJECT_NAME)-$(VERSION)-$(BRANCH).tar.gz)
 DEV_STORAGE = https://storage.dev.isgneuro.com/repository/components
 
 DTCD_SDK = DTCD-SDK
-DTCD_SDK_URL = $(DEV_STORAGE)/$(DTCD_SDK)/$(DTCD_SDK)-0.1.1-develop-0016.tar.gz
+DTCD_SDK_URL = $(DEV_STORAGE)/$(DTCD_SDK)/$(DTCD_SDK)-0.1.1-develop-0017.tar.gz
 
 CONNECTOR_NAME = ot_js_connector
 CONNECTOR_URL = $(DEV_STORAGE)/$(CONNECTOR_NAME)/$(CONNECTOR_NAME)-1.1.1-develop-0007.tar.gz
