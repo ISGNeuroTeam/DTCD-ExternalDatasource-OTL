@@ -15,19 +15,19 @@ export class DataSourceContent extends BaseDataSourceContent {
     return new DatasetView(this.#data);
   }
 
-  toArray() {
-    return new ArrayView(this.#data);
-  }
+  // toArray() {
+  //   return new ArrayView(this.#data);
+  // }
 
-  toJSON() {
-    return new JsonView(this.#data);
-  }
+  // toJSON() {
+  //   return new JsonView(this.#data);
+  // }
 
-  toString() {
-    throw new Error('OTL-datasource cannot be cast to string');
-  }
+  // toString() {
+  //   throw new Error('OTL-datasource cannot be cast to string');
+  // }
 
-  toNumber() {
-    throw new Error('OTL-datasource cannot be cast to number');
-  }
+  // toNumber() {
+  //   throw new Error('OTL-datasource cannot be cast to number');
+  // }
 }
