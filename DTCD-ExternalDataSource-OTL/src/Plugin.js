@@ -1,9 +1,13 @@
 import pluginMeta from './Plugin.Meta';
 
-import {BaseExternalDataSource, BaseDataset, InteractionSystemAdapter, LogSystemAdapter} from 'SDK';
+import {
+  InteractionSystemAdapter,
+  LogSystemAdapter,
+  BaseExternalDataSource,
+  InProgressError,
+} from 'SDK';
+import {DataSourceContent} from './classes/DataSourceContent';
 import {OTPConnectorService} from '../../ot_js_connector';
-
-import {InProgressError} from './classes/InProgressError';
 
 const connectorConfig = {
   modeHTTP: 'http',
@@ -18,7 +22,6 @@ export class DataSourcePlugin extends BaseExternalDataSource {
   #interactionSystem;
   #logSystem;
   #otpService;
-  #status;
 
   #job;
   #jobParams = {};
@@ -47,29 +50,35 @@ export class DataSourcePlugin extends BaseExternalDataSource {
 
   async init() {
     const job = await this.#otpService.jobManager.createJob(this.#jobParams, {blocking: true});
-    const jobStatus = await job.status();
     this.#job = job;
-    this.#status = jobStatus === 'success' ? 'complete' : 'error';
-    return true;
+    const jobStatus = await job.status();
+    if (jobStatus === 'success') return true;
+    else if (jobStatus === 'running') throw new InProgressError();
+    else throw new Error('Job not inited!');
   }
 
-  async toDataset() {
-    if (this.#status === 'complete') {
-      return await this.#job.dataset().data();
-    } else if (this.#status === 'inProgress') {
-      throw new InProgressError('Error: Job with "inProgress" status');
-    } else {
-      throw new Error('Error of job!');
+  async getRows(start, endParam, filterObject) {
+    const data = await this.#job.dataset().data();
+    const end = endParam === 0 ? data.length : endParam;
+    let filtered;
+    if (typeof filterObject !== 'object') filtered = data;
+    else {
+      filtered = data.filter(item => {
+        for (let key of Object.keys(filterObject)) {
+          if (!item[key].includes(filterObject[key])) return false;
+        }
+        return true;
+      });
     }
+    return new DataSourceContent(filtered.slice(start, end));
+  }
+
+  async getSchema() {
+    return await this.#job.dataset().parseSchema();
   }
 
   async rerun() {
     if (!this.#job) return;
     await this.#job.run();
-    this.#status = 'inProgress';
-  }
-
-  get status() {
-    return this.#status;
   }
 }

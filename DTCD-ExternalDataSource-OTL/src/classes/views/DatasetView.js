@@ -1,45 +1,26 @@
-import {BaseDataset} from 'SDK/DataSourceClasses';
+import {BaseDataset} from 'SDK';
 
 export class DatasetView extends BaseDataset {
-  #jobDataset;
-  #urls = [];
   #data = null;
 
-  constructor(jobDataset = null) {
+  constructor(data = null) {
     super();
-    this.#jobDataset = jobDataset;
-    this.#jobDataset.urls().then(res => {
-      this.#urls = res;
-    });
+    this.#data = data;
   }
 
-  async #checkData() {
-    if (!this.#data) {
-      this.#data = await this.#jobDataset.data();
-    }
-  }
-
-  get schema() {
-    return this.#jobDataset.parseSchema();
-  }
-
-  async full() {
-    await this.#checkData();
+  full() {
     return this.#data;
   }
 
-  async firstLine() {
-    await this.#checkData();
+  firstLine() {
     return this.#data[0];
   }
 
-  async lastLine() {
-    await this.#checkData();
+  lastLine() {
     return this.#data[this.#data.length - 1];
   }
 
-  async getLineByNumber(num) {
-    await this.#checkData();
+  getLineByNumber(num) {
     return this.#data[num - 1];
   }
 }
