@@ -81,4 +81,8 @@ export class DataSourcePlugin extends BaseExternalDataSource {
     if (!this.#job) return;
     await this.#job.run();
   }
+
+  toString() {
+    return `OTL DataSource inited`;
+  }
 }
