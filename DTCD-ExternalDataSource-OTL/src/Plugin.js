@@ -19,6 +19,7 @@ const connectorConfig = {
 };
 
 export class DataSourcePlugin extends BaseExternalDataSource {
+  #guid;
   #interactionSystem;
   #logSystem;
   #otpService;
@@ -36,6 +37,7 @@ export class DataSourcePlugin extends BaseExternalDataSource {
 
   constructor(guid, jobParams) {
     super();
+    this.#guid = guid;
     this.#jobParams = jobParams;
     this.#logSystem = new LogSystemAdapter(guid, pluginMeta.name);
     this.#interactionSystem = new InteractionSystemAdapter();
@@ -84,5 +86,9 @@ export class DataSourcePlugin extends BaseExternalDataSource {
 
   toString() {
     return `OTL DataSource inited`;
+  }
+
+  get guid() {
+    return this.#guid;
   }
 }
