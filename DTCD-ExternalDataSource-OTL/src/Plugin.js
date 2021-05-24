@@ -50,15 +50,15 @@ export class DataSourcePlugin extends BaseExternalDataSource {
     } else throw new Error('Job not inited!');
   }
 
-  [Symbol.asyncIterator]() {
+  [Symbol.iterator]() {
     return {
       currentIndex: 0,
       data: this.#data,
-      async next() {
+      next() {
         if (this.currentIndex >= this.data.length) {
           return {done: true};
         } else {
-          const value = await this.data[this.currentIndex];
+          const value = this.data[this.currentIndex];
           this.currentIndex += 1;
           return {value, done: false};
         }
