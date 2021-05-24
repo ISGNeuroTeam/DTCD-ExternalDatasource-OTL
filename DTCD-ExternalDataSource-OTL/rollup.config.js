@@ -1,17 +1,21 @@
-import { nodeResolve } from '@rollup/plugin-node-resolve';
-import { babel } from '@rollup/plugin-babel';
+import {nodeResolve} from '@rollup/plugin-node-resolve';
+import {babel} from '@rollup/plugin-babel';
+
+import json from '@rollup/plugin-json';
 import commonjs from '@rollup/plugin-commonjs';
 import alias from '@rollup/plugin-alias';
 import path from 'path';
-import pluginMeta from './src/Plugin.Meta';
+
+import {pluginMeta} from './../DTCD-ExternalDataSource-OTL/package.json';
 
 const watch = Boolean(process.env.ROLLUP_WATCH);
 
-const pluginName = pluginMeta.name.replace('_','-');
+const pluginName = pluginMeta.name.replace('_', '-');
 const outputFile = `${pluginName}.js`;
 const outputDirectory = watch ? `./../../DTCD/server/plugins/DTCD-${pluginName}` : `./build`;
 
 const plugins = [
+  json(),
   commonjs(),
   nodeResolve({
     browser: true,
@@ -19,8 +23,8 @@ const plugins = [
   alias({
     entries: {
       '@': path.resolve(__dirname, 'src'),
-      'SDK': path.resolve(__dirname, './../DTCD-SDK'),
-    }
+      SDK: path.resolve(__dirname, './../DTCD-SDK'),
+    },
   }),
   babel({
     babelHelpers: 'bundled',

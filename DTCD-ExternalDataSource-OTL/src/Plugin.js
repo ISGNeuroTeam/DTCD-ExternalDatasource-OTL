@@ -1,12 +1,6 @@
-import pluginMeta from './Plugin.Meta';
+import {pluginMeta} from './../package.json';
 
-import {
-  InteractionSystemAdapter,
-  LogSystemAdapter,
-  BaseExternalDataSource,
-  InProgressError,
-} from 'SDK';
-import {DataSourceContent} from './classes/DataSourceContent';
+import {InteractionSystemAdapter, InProgressError, BaseExternalDataSource} from 'SDK';
 import {OTPConnectorService} from '../../ot_js_connector';
 
 const connectorConfig = {
@@ -19,12 +13,11 @@ const connectorConfig = {
 };
 
 export class DataSourcePlugin extends BaseExternalDataSource {
-  #guid;
   #interactionSystem;
-  #logSystem;
   #otpService;
 
   #job;
+  #data;
   #jobParams = {};
 
   static getExtensionInfo() {
@@ -35,15 +28,11 @@ export class DataSourcePlugin extends BaseExternalDataSource {
     return pluginMeta;
   }
 
-  constructor(guid, jobParams) {
+  constructor(jobParams) {
     super();
-    this.#guid = guid;
     this.#jobParams = jobParams;
-    this.#logSystem = new LogSystemAdapter(guid, pluginMeta.name);
     this.#interactionSystem = new InteractionSystemAdapter();
-
     const {baseURL: url} = this.#interactionSystem.instance;
-
     this.#otpService = new OTPConnectorService(
       {url, ...connectorConfig},
       this.#interactionSystem.instance
@@ -51,28 +40,30 @@ export class DataSourcePlugin extends BaseExternalDataSource {
   }
 
   async init() {
-    const job = await this.#otpService.jobManager.createJob(this.#jobParams, {blocking: true});
-    this.#job = job;
-    const jobStatus = await job.status();
-    if (jobStatus === 'success') return true;
-    else if (jobStatus === 'running') throw new InProgressError();
-    else throw new Error('Job not inited!');
+    this.#job = await this.#otpService.jobManager.createJob(this.#jobParams, {blocking: true});
+    const jobStatus = await this.#job.status();
+    if (jobStatus === 'success') {
+      this.#data = await this.#job.dataset().data();
+      return true;
+    } else if (jobStatus === 'running') {
+      throw new InProgressError('sad');
+    } else throw new Error('Job not inited!');
   }
 
-  async getRows(start, endParam, filterObject) {
-    const data = await this.#job.dataset().data();
-    const end = endParam === 0 ? data.length : endParam;
-    let filtered;
-    if (typeof filterObject !== 'object') filtered = data;
-    else {
-      filtered = data.filter(item => {
-        for (let key of Object.keys(filterObject)) {
-          if (!item[key].includes(filterObject[key])) return false;
+  [Symbol.asyncIterator]() {
+    return {
+      currentIndex: 0,
+      data: this.#data,
+      async next() {
+        if (this.currentIndex >= this.data.length) {
+          return {done: true};
+        } else {
+          const value = await this.data[this.currentIndex];
+          this.currentIndex += 1;
+          return {value, done: false};
         }
-        return true;
-      });
-    }
-    return new DataSourceContent(filtered.slice(start, end));
+      },
+    };
   }
 
   async getSchema() {
@@ -86,9 +77,5 @@ export class DataSourcePlugin extends BaseExternalDataSource {
 
   toString() {
     return `OTL DataSource inited`;
-  }
-
-  get guid() {
-    return this.#guid;
   }
 }

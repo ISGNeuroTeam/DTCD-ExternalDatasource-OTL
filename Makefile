@@ -10,7 +10,7 @@ endef
 PROJECT_NAME = DTCD-ExternalDataSource-OTL
 PLUGIN_NAME = ExternalDataSource-OTL
 
-GENERATE_VERSION = $(shell jq .version ./${PROJECT_NAME}/package.json )
+GENERATE_VERSION = $(shell jq .pluginMeta.version ./${PROJECT_NAME}/package.json )
 GENERATE_BRANCH = $(shell git name-rev $$(git rev-parse HEAD) | cut -d\  -f2 | sed -re 's/^(remotes\/)?origin\///' | tr '/' '_')
 
 SET_VERSION = $(eval VERSION=$(GENERATE_VERSION))
