@@ -1,7 +1,7 @@
-import {pluginMeta} from './../package.json';
+import { pluginMeta } from './../package.json';
 
-import {InteractionSystemAdapter, InProgressError, BaseExternalDataSource} from 'SDK';
-import {OTPConnectorService} from '../../ot_js_connector';
+import { InteractionSystemAdapter, InProgressError, BaseExternalDataSource } from 'SDK';
+import { OTPConnectorService } from '../../ot_js_connector';
 
 const connectorConfig = {
   modeHTTP: 'http',
@@ -17,11 +17,10 @@ export class DataSourcePlugin extends BaseExternalDataSource {
   #otpService;
 
   #job;
-  #data;
   #jobParams = {};
 
   static getExtensionInfo() {
-    return {type: 'OTL'};
+    return { type: 'OTL' };
   }
 
   static getRegistrationMeta() {
@@ -30,37 +29,38 @@ export class DataSourcePlugin extends BaseExternalDataSource {
 
   constructor(jobParams) {
     super();
+    this.data = [];
     this.#jobParams = jobParams;
     this.#interactionSystem = new InteractionSystemAdapter();
-    const {baseURL: url} = this.#interactionSystem.instance;
+    const { baseURL: url } = this.#interactionSystem.instance;
     this.#otpService = new OTPConnectorService(
-      {url, ...connectorConfig},
+      { url, ...connectorConfig },
       this.#interactionSystem.instance
     );
   }
 
   async init() {
-    this.#job = await this.#otpService.jobManager.createJob(this.#jobParams, {blocking: true});
+    this.#job = await this.#otpService.jobManager.createJob(this.#jobParams, { blocking: true });
     const jobStatus = await this.#job.status();
     if (jobStatus === 'success') {
-      this.#data = await this.#job.dataset().data();
+      this.data = await this.#job.dataset().data();
       return true;
     } else if (jobStatus === 'running') {
-      throw new InProgressError('sad');
+      throw new InProgressError('');
     } else throw new Error('Job not inited!');
   }
 
   [Symbol.iterator]() {
     return {
       currentIndex: 0,
-      data: this.#data,
+      iterable: this,
       next() {
-        if (this.currentIndex >= this.data.length) {
-          return {done: true};
+        if (this.currentIndex >= this.iterable.data.length) {
+          return { done: true };
         } else {
-          const value = this.data[this.currentIndex];
+          const value = this.iterable.data[this.currentIndex];
           this.currentIndex += 1;
-          return {value, done: false};
+          return { value, done: false };
         }
       },
     };
