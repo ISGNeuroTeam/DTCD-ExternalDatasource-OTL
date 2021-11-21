@@ -29,7 +29,6 @@ export class DataSourcePlugin extends BaseExternalDataSource {
 
   constructor(jobParams) {
     super();
-    this.data = [];
     this.#jobParams = jobParams;
     this.#interactionSystem = new InteractionSystemAdapter();
     const { baseURL: url } = this.#interactionSystem.instance;
@@ -40,39 +39,30 @@ export class DataSourcePlugin extends BaseExternalDataSource {
   }
 
   async init() {
-    this.#job = await this.#otpService.jobManager.createJob(this.#jobParams, { blocking: true });
-    const jobStatus = await this.#job.status();
-    if (jobStatus === 'success') {
-      this.data = await this.#job.dataset().data();
+    try {
+      this.#job = await this.#otpService.jobManager.createJob(this.#jobParams, { blocking: true });
       return true;
-    } else if (jobStatus === 'running') {
-      throw new InProgressError('');
-    } else throw new Error('Job not inited!');
-  }
-
-  [Symbol.iterator]() {
-    return {
-      currentIndex: 0,
-      iterable: this,
-      next() {
-        if (this.currentIndex >= this.iterable.data.length) {
-          return { done: true };
-        } else {
-          const value = this.iterable.data[this.currentIndex];
-          this.currentIndex += 1;
-          return { value, done: false };
-        }
-      },
-    };
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
   }
 
   async getSchema() {
     return await this.#job.dataset().parseSchema();
   }
 
+  async getData() {
+    return await this.#job.dataset().data();
+  }
+
   async rerun() {
     if (!this.#job) return;
     await this.#job.run();
+  }
+
+  editParams(jobParams) {
+    this.#jobParams = jobParams;
   }
 
   toString() {
