@@ -10,6 +10,7 @@ const connectorConfig = {
   maxJobExecTime: 300,
   checkjobDelayTime: 1,
   httpRequestTimeout: 70,
+  loginBeforeJobRun: false,
 };
 
 export class DataSourcePlugin extends BaseExternalDataSource {
