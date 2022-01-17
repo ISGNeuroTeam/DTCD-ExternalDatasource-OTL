@@ -28,9 +28,9 @@ export class DataSourcePlugin extends BaseExternalDataSource {
     return pluginMeta;
   }
 
-  constructor(jobParams) {
+  constructor({ queryString: original_otl, ...rest }) {
     super();
-    this.#jobParams = jobParams;
+    this.#jobParams = { original_otl, ...rest };
     this.#interactionSystem = new InteractionSystemAdapter();
     const { baseURL: url } = this.#interactionSystem.instance;
     this.#otpService = new OTPConnectorService(
@@ -62,8 +62,9 @@ export class DataSourcePlugin extends BaseExternalDataSource {
     await this.#job.run();
   }
 
-  editParams(jobParams) {
-    this.#jobParams = jobParams;
+  editParams({ queryString: original_otl, ...rest }) {
+    if (original_otl) this.#jobParams = Object.assign(this.#jobParams, { original_otl, ...rest });
+    else this.#jobParams = Object.assign(this.#jobParams, rest);
   }
 
   toString() {
