@@ -36,7 +36,7 @@ export class DataSourcePlugin extends BaseExternalDataSource {
 
   constructor({ queryString: original_otl, ...rest }) {
     super();
-    this.#logSystem = new LogSystemAdapter('no-guid', 'ExternalDatasource-OTL');
+    this.#logSystem = new LogSystemAdapter('0.4.0', 'no-guid', pluginMeta.name);
     this.#interactionSystem = new InteractionSystemAdapter();
     this.#logSystem.debug(
       `Initing ExternalDatasource-OTL instance with parameters: ${JSON.stringify({

@@ -10,10 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - logs
+- version of core systems for adapters
 
 ### Changed
 
 - changed arguments of methods to accept 'queryString' from DataSourceSystem
+- build process in order to make directory name with current version of plugin
 
 ## [0.1.0]
 
