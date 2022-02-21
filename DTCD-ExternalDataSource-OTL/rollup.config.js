@@ -6,13 +6,15 @@ import commonjs from '@rollup/plugin-commonjs';
 import alias from '@rollup/plugin-alias';
 import path from 'path';
 
-import {pluginMeta} from './../DTCD-ExternalDataSource-OTL/package.json';
+import {pluginMeta} from './package.json';
 
 const watch = Boolean(process.env.ROLLUP_WATCH);
 
-const pluginName = pluginMeta.name.replace('_', '-');
+const pluginName = pluginMeta.name.replace(/_/g, '-');
+const version = pluginMeta.version;
+
 const outputFile = `${pluginName}.js`;
-const outputDirectory = watch ? `./../../DTCD/server/plugins/DTCD-${pluginName}` : `./build`;
+const outputDirectory = watch ? `./../../DTCD/server/plugins/DTCD-${pluginName}_${version}` : `./build`;
 
 const plugins = [
   json(),

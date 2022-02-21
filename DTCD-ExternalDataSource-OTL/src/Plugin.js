@@ -1,6 +1,11 @@
 import { pluginMeta } from './../package.json';
 
-import { InteractionSystemAdapter, InProgressError, BaseExternalDataSource } from 'SDK';
+import {
+  InteractionSystemAdapter,
+  LogSystemAdapter,
+  InProgressError,
+  BaseExternalDataSource,
+} from 'SDK';
 import { OTPConnectorService } from '../../ot_js_connector';
 
 const connectorConfig = {
@@ -15,6 +20,7 @@ const connectorConfig = {
 
 export class DataSourcePlugin extends BaseExternalDataSource {
   #interactionSystem;
+  #logSystem;
   #otpService;
 
   #job;
@@ -28,10 +34,18 @@ export class DataSourcePlugin extends BaseExternalDataSource {
     return pluginMeta;
   }
 
-  constructor(jobParams) {
+  constructor({ queryString: original_otl, ...rest }) {
     super();
-    this.#jobParams = jobParams;
-    this.#interactionSystem = new InteractionSystemAdapter();
+    this.#logSystem = new LogSystemAdapter('0.5.0', 'no-guid', pluginMeta.name);
+    this.#interactionSystem = new InteractionSystemAdapter('0.4.0');
+    this.#logSystem.debug(
+      `Initing ExternalDatasource-OTL instance with parameters: ${JSON.stringify({
+        original_otl,
+        ...rest,
+      })}`
+    );
+    this.#jobParams = { original_otl, ...rest };
+
     const { baseURL: url } = this.#interactionSystem.instance;
     this.#otpService = new OTPConnectorService(
       { url, ...connectorConfig },
@@ -41,9 +55,13 @@ export class DataSourcePlugin extends BaseExternalDataSource {
 
   async init() {
     try {
+      this.#logSystem.debug(
+        `Creating OTL job instance with parameters: ${JSON.stringify(this.#jobParams)}`
+      );
       this.#job = await this.#otpService.jobManager.createJob(this.#jobParams, { blocking: true });
       return true;
     } catch (error) {
+      this.#logSystem.error(`Error occured while creating OTL job: ${JSON.stringify(error)}`);
       console.error(error);
       return false;
     }
@@ -62,11 +80,24 @@ export class DataSourcePlugin extends BaseExternalDataSource {
     await this.#job.run();
   }
 
-  editParams(jobParams) {
-    this.#jobParams = jobParams;
-  }
+  editParams({ queryString: original_otl, ...rest }) {
+    if (original_otl) {
+      this.#logSystem.debug(
+        `Editing parameters of OTL job. Merging new parameters: ${JSON.stringify({
+          original_otl,
+          ...rest,
+        })} to existing: ${JSON.stringify(this.#jobParams)}`
+      );
 
-  toString() {
-    return `OTL DataSource inited`;
+      this.#jobParams = Object.assign(this.#jobParams, { original_otl, ...rest });
+    } else {
+      this.#logSystem.debug(
+        `Editing parameters of OTL job. Merging new parameters: ${JSON.stringify(
+          rest
+        )} to existing: ${JSON.stringify(this.#jobParams)}`
+      );
+
+      this.#jobParams = Object.assign(this.#jobParams, rest);
+    }
   }
 }
