@@ -38,13 +38,15 @@ export class DataSourcePlugin extends BaseExternalDataSource {
     super();
     this.#logSystem = new LogSystemAdapter('0.5.0', 'no-guid', pluginMeta.name);
     this.#interactionSystem = new InteractionSystemAdapter('0.4.0');
+
+    original_otl = original_otl.replace(/\r|\n/g, '');
     this.#logSystem.debug(
       `Initing ExternalDatasource-OTL instance with parameters: ${JSON.stringify({
         original_otl,
         ...rest,
       })}`
     );
-    this.#jobParams = { original_otl, ...rest };
+    this.#jobParams = { ...rest, original_otl };
 
     const { baseURL: url } = this.#interactionSystem.instance;
     this.#otpService = new OTPConnectorService(
