@@ -2,6 +2,7 @@ import { pluginMeta } from './../package.json';
 
 import {
   InteractionSystemAdapter,
+  StorageSystemAdapter,
   LogSystemAdapter,
   InProgressError,
   BaseExternalDataSource,
@@ -20,6 +21,7 @@ const connectorConfig = {
 
 export class DataSourcePlugin extends BaseExternalDataSource {
   #interactionSystem;
+  #storageSystem;
   #logSystem;
   #otpService;
 
@@ -38,6 +40,7 @@ export class DataSourcePlugin extends BaseExternalDataSource {
     super();
     this.#logSystem = new LogSystemAdapter('0.5.0', 'no-guid', pluginMeta.name);
     this.#interactionSystem = new InteractionSystemAdapter('0.4.0');
+    this.#storageSystem = new StorageSystemAdapter('0.9.0');
 
     const original_otl = queryString.replace(/\r|\n/g, '');
 
@@ -61,6 +64,7 @@ export class DataSourcePlugin extends BaseExternalDataSource {
       this.#logSystem.debug(
         `Creating OTL job instance with parameters: ${JSON.stringify(this.#jobParams)}`
       );
+      this.#jobParams.username = await this.#getCurrentUsername();
       this.#job = await this.#otpService.jobManager.createJob(this.#jobParams, { blocking: true });
       return true;
     } catch (error) {
@@ -81,6 +85,19 @@ export class DataSourcePlugin extends BaseExternalDataSource {
   async rerun() {
     if (!this.#job) return;
     await this.#job.run();
+  }
+
+  async #getCurrentUsername() {
+    const store = this.#storageSystem.session.system;
+
+    if (store.hasRecord('_username')) {
+      return store.getRecord('_username');
+    }
+
+    const { data: { username } } = await this.#interactionSystem.GETRequest('/dtcd_utils/v1/user?username');
+    store.putRecord('_username', username);
+
+    return username;
   }
 
   editParams({ queryString, ...rest }) {
