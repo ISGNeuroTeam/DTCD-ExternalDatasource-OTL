@@ -34,17 +34,20 @@ export class DataSourcePlugin extends BaseExternalDataSource {
     return pluginMeta;
   }
 
-  constructor({ queryString: original_otl, ...rest }) {
+  constructor({ queryString, ...rest }) {
     super();
     this.#logSystem = new LogSystemAdapter('0.5.0', 'no-guid', pluginMeta.name);
     this.#interactionSystem = new InteractionSystemAdapter('0.4.0');
+
+    const original_otl = queryString.replace(/\r|\n/g, '');
+
     this.#logSystem.debug(
       `Initing ExternalDatasource-OTL instance with parameters: ${JSON.stringify({
         original_otl,
         ...rest,
       })}`
     );
-    this.#jobParams = { original_otl, ...rest };
+    this.#jobParams = { ...rest, original_otl };
 
     const { baseURL: url } = this.#interactionSystem.instance;
     this.#otpService = new OTPConnectorService(
@@ -80,7 +83,9 @@ export class DataSourcePlugin extends BaseExternalDataSource {
     await this.#job.run();
   }
 
-  editParams({ queryString: original_otl, ...rest }) {
+  editParams({ queryString, ...rest }) {
+    const original_otl = queryString.replace(/\r|\n/g, '');
+
     if (original_otl) {
       this.#logSystem.debug(
         `Editing parameters of OTL job. Merging new parameters: ${JSON.stringify({
@@ -89,7 +94,7 @@ export class DataSourcePlugin extends BaseExternalDataSource {
         })} to existing: ${JSON.stringify(this.#jobParams)}`
       );
 
-      this.#jobParams = Object.assign(this.#jobParams, { original_otl, ...rest });
+      this.#jobParams = Object.assign(this.#jobParams, { ...rest, original_otl });
     } else {
       this.#logSystem.debug(
         `Editing parameters of OTL job. Merging new parameters: ${JSON.stringify(

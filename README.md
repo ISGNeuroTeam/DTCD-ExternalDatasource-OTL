@@ -46,7 +46,7 @@ tar -zxf DTCD-ExternalDataSource-OTL-*.tar.gz ./DTCD-ExternalDataSource-OTL
 
 ## Built With
 
-- [DTCD-SDK](https://github.com/ISGNeuroTeam/DTCD-SDK) v0.1.2
+- [DTCD-SDK](https://github.com/ISGNeuroTeam/DTCD-SDK) v0.2.0
 - [Rollup.js](https://rollupjs.org/guide/en/) - JavaScript project builder
 
 ## Contributing
