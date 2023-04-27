@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - current username to `makejob` request params
 
+### Removed
+
+- login and password from default connector config
+
 ## [0.4.0]
 
 ### Added

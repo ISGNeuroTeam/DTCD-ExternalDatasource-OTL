@@ -11,8 +11,6 @@ import { OTPConnectorService } from '../../ot_js_connector';
 
 const connectorConfig = {
   modeHTTP: 'http',
-  username: 'admin',
-  password: '12345678',
   maxJobExecTime: 300,
   checkjobDelayTime: 1,
   httpRequestTimeout: 70,
