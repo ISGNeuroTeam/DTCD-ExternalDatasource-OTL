@@ -1,4 +1,4 @@
-import { pluginMeta } from './../package.json';
+import pluginMeta from './Plugin.Meta';
 
 import {
   InteractionSystemAdapter,
