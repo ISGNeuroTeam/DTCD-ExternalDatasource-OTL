@@ -6,7 +6,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import alias from '@rollup/plugin-alias';
 import path from 'path';
 
-import {pluginMeta} from './package.json';
+import pluginMeta from './src/Plugin.Meta';
 
 const watch = Boolean(process.env.ROLLUP_WATCH);
 
